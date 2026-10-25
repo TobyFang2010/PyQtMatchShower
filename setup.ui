@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SetupDialog</class>
+ <widget class="QDialog" name="SetupDialog">
+  <property name="geometry">
+   <rect><x>0</x><y>0</y><width>520</width><height>680</height></rect>
+  </property>
+  <property name="windowTitle"><string>比赛设置</string></property>
+  <layout class="QVBoxLayout" name="mainLayout">
+   <item>
+    <layout class="QHBoxLayout" name="titleLayout">
+     <item><widget class="QLabel" name="labelTitle"><property name="text"><string>赛事名称:</string></property></widget></item>
+     <item><widget class="QLineEdit" name="lineEditMatchName"><property name="placeholderText"><string>例如：篮球赛总决赛</string></property></widget></item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="teamALayout">
+     <item><widget class="QLabel" name="labelTeamA"><property name="text"><string>甲队名称:</string></property></widget></item>
+     <item><widget class="QLineEdit" name="lineEditTeamA"><property name="placeholderText"><string>甲队</string></property></widget></item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="teamBLayout">
+     <item><widget class="QLabel" name="labelTeamB"><property name="text"><string>乙队名称:</string></property></widget></item>
+     <item><widget class="QLineEdit" name="lineEditTeamB"><property name="placeholderText"><string>乙队</string></property></widget></item>
+    </layout>
+   </item>
+   <item>
+    <widget class="GroupBox" name="groupTemplate">
+     <property name="title"><string>使用模板</string></property>
+     <layout class="QVBoxLayout" name="templateLayout">
+      <item><widget class="QRadioButton" name="radioNone"><property name="text"><string>无（通用）</string></property><property name="checked"><bool>true</bool></property></widget></item>
+      <item><widget class="QRadioButton" name="radioBasketball"><property name="text"><string>篮球</string></property></widget></item>
+      <item><widget class="QRadioButton" name="radioPvZ"><property name="text"><string>植物大战僵尸对战</string></property></widget></item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="GroupBox" name="groupMatchSettings">
+     <property name="title"><string>比赛设置</string></property>
+     <layout class="QVBoxLayout" name="settingsLayout">
+      <item>
+       <layout class="QHBoxLayout" name="durationLayout">
+        <item><widget class="QLabel" name="labelDuration"><property name="text"><string>单局时长:</string></property></widget></item>
+        <item><widget class="QTimeEdit" name="timeEditDuration"><property name="time"><time><hour>0</hour><minute>20</minute><second>0</second></time></property><property name="displayFormat"><string>HH:mm:ss</string></property></widget></item>
+        <item><widget class="QCheckBox" name="checkUnknownDuration"><property name="text"><string>未知单局时长</string></property></widget></item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="foulLayout">
+        <item><widget class="QCheckBox" name="checkFoul"><property name="text"><string>采用犯规记录</string></property></widget></item>
+        <item><widget class="QLabel" name="labelFoulLimit"><property name="text"><string>犯规上限:</string></property></widget></item>
+        <item><widget class="QSpinBox" name="spinFoulLimit"><property name="minimum"><number>1</number></property><property name="maximum"><number>100</number></property><property name="value"><number>5</number></property><property name="enabled"><bool>false</bool></property></widget></item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="timeoutLayout">
+        <item><widget class="QCheckBox" name="checkTimeout"><property name="text"><string>采用战术暂停记录</string></property></widget></item>
+        <item><widget class="QLabel" name="labelTimeoutLimit"><property name="text"><string>暂停上限:</string></property></widget></item>
+        <item><widget class="QSpinBox" name="spinTimeoutLimit"><property name="minimum"><number>1</number></property><property name="maximum"><number>20</number></property><property name="value"><number>3</number></property><property name="enabled"><bool>false</bool></property></widget></item>
+       </layout>
+      </item>
+      <item><widget class="QCheckBox" name="checkOffenseSide"><property name="text"><string>采用"进攻方"设定</string></property></widget></item>
+      <item><widget class="QCheckBox" name="checkMidGameChange"><property name="text"><string>允许局内更改</string></property></widget></item>
+      <item>
+       <layout class="QHBoxLayout" name="autoSwitchLayout">
+        <item><widget class="QCheckBox" name="checkAutoSwitch"><property name="text"><string>单局结束自动切换</string></property></widget></item>
+        <item><widget class="QComboBox" name="comboSwitchTiming"><item><property name="text"><string>局初</string></property></item><item><property name="text"><string>局末</string></property></item></widget></item>
+       </layout>
+      </item>
+      <item><widget class="QCheckBox" name="checkBigScore"><property name="text"><string>采用大比分设置</string></property></widget></item>
+      <item>
+       <layout class="QHBoxLayout" name="totalRoundsLayout">
+        <item><widget class="QLabel" name="labelTotalRounds"><property name="text"><string>总局数:</string></property></widget></item>
+        <item><widget class="QSpinBox" name="spinTotalRounds"><property name="minimum"><number>1</number></property><property name="maximum"><number>99</number></property><property name="value"><number>3</number></property></widget></item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="buttonLayout">
+     <item><spacer name="horizontalSpacer"><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
+     <item><widget class="QPushButton" name="btnStart"><property name="text"><string>开始比赛</string></property><property name="minimumSize"><size><width>120</width><height>40</height></size></property></widget></item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>BaseControlsDialog</class>
+ <widget class="QDialog" name="BaseControlsDialog">
+  <property name="geometry">
+   <rect><x>0</x><y>0</y><width>240</width><height>480</height></rect>
+  </property>
+  <property name="windowTitle"><string>快捷操作 - 通用</string></property>
+  <layout class="QVBoxLayout" name="mainLayout">
+   <item><widget class="QLabel" name="labelTitle"><property name="text"><string>快捷指令</string></property><property name="alignment"><set>Qt::AlignCenter</set></property><property name="font"><font><pointsize>14</pointsize><bold>true</bold></font></property></widget></item>
+   <item><widget class="QPushButton" name="btnAddScoreA"><property name="text"><string>甲队 +1 分</string></property><property name="minimumSize"><size><width>0</width><height>55</height></size></property></widget></item>
+   <item><widget class="QPushButton" name="btnAddScoreB"><property name="text"><string>乙队 +1 分</string></property><property name="minimumSize"><size><width>0</width><height>55</height></size></property></widget></item>
+   <item><widget class="PushButton" name="btnSubScoreA"><property name="text"><string>甲队 -1 分</string></property><property name="minimumSize"><size><width>0</width><height>50</height></size></property></widget></item>
+   <item><widget class="QPushButton" name="btnSubScoreB"><property name="text"><string>乙队 -1 分</string></property><property name="minimumSize"><size><width>0</width><height>50</height></size></property></widget></item>
+   <item><widget class="HorizontalLine" name="line1"/></item>
+   <item><widget class="QPushButton" name="btnPause"><property name="text"><string>暂停 / 继续</string></property><property name="minimumSize"><size><width>0</width><height>55</height></size></property></widget></item>
+   <item><widget class="QPushButton" name="btnReset"><property name="text"><string>重置比分</string></property><property name="minimumSize"><size><width>0</width><height>50</height></size></property></widget></item>
+   <item><spacer name="verticalSpacer"><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

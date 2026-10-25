@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>BaseScoreboardWindow</class>
+ <widget class="QMainWindow" name="BaseScoreboardWindow">
+  <property name="geometry">
+   <rect><x>0</x><y>0</y><width>1000</width><height>600</height></rect>
+  </property>
+  <property name="windowTitle"><string>计分板</string></property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="mainLayout">
+    <item>
+     <widget class="QLabel" name="labelTitle">
+      <property name="text"><string>甲队 VS 乙队</string></property>
+      <property name="alignment"><set>Qt::AlignCenter</set></property>
+      <property name="font"><font><pointsize>24</pointsize><bold>true</bold></font></property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="scoreDisplayLayout">
+      <item>
+       <layout class="QVBoxLayout" name="teamALayout">
+        <item><widget class="QLabel" name="labelTeamAName"><property name="text"><string>甲队</string></property><property name="alignment"><set>Qt::AlignCenter</set></property><property name="font"><font><pointsize>18</pointsize><bold>true</bold></font></property></widget></item>
+        <item><widget class="QLCDNumber" name="lcdScoreA"><property name="minimumSize"><size><width>250</width><height>180</height></size></property><property name="digitCount"><number>3</number></property><property name="styleSheet"><string notr="true">color: red; background-color: black;</string></property></widget></item>
+        <item><widget class="QLabel" name="labelScoreAOverlay"><property name="text"><string/></property><property name="alignment"><set>Qt::AlignCenter</set></property><property name="font"><font><pointsize>56</pointsize><bold>true</bold></font></property><property name="styleSheet"><string notr="true">color: #00ff00; background-color: rgba(0, 0, 0, 180); border-radius: 10px;</string></property><property name="visible"><bool>false</bool></property></widget></item>
+       </layout>
+      </item>
+      <item><widget class="QLabel" name="labelVS"><property name="text"><string>VS</string></property><property name="alignment"><set>Qt::AlignCenter</set></property><property name="font"><font><pointsize>28</pointsize><bold>true</bold></font></property></widget></item>
+      <item>
+       <layout class="QVBoxLayout" name="teamBLayout">
+        <item><widget class="QLabel" name="labelTeamBName"><property name="text"><string>乙队</string></property><property name="alignment"><set>Qt::AlignCenter</set></property><property name="font"><font><pointsize>18</pointsize><bold>true</bold></font></property></widget></item>
+        <item><widget class="QLCDNumber" name="lcdScoreB"><property name="minimumSize"><size><width>250</width><height>180</height></size></property><property name="digitCount"><number>3</number></property><property name="styleSheet"><string notr="true">color: blue; background-color: black;</string></property></widget></item>
+        <item><widget class="QLabel" name="labelScoreBOverlay"><property name="text"><string/></property><property name="alignment"><set>Qt::AlignCenter</set></property><property name="font"><font><pointsize>56</pointsize><bold>true</bold></font></property><property name="styleSheet"><string notr="true">color: #00ff00; background-color: rgba(0, 0, 0, 180); border-radius: 10px;</string></property><property name="visible"><bool>false</bool></property></widget></item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+    <item><widget class="QLabel" name="labelTimeTitle"><property name="text"><string>剩余时间</string></property><property name="alignment"><set>Qt::AlignCenter</set></property></widget></item>
+    <item><widget class="QLCDNumber" name="lcdTime"><property name="minimumSize"><size><width>350</width><height>110</height></size></property><property name="digitCount"><number>8</number></property><property name="styleSheet"><string notr="true">color: yellow; background-color: black;</string></property></widget></item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

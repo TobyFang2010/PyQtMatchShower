@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>BasketballScoreboardWindow</class>
+ <widget class="QMainWindow" name="BasketballScoreboardWindow">
+  <property name="geometry">
+   <rect><x>0</x><y>0</y><width>1200</width><height>650</height></rect>
+  </property>
+  <property name="windowTitle"><string>篮球计分板</string></property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="mainLayout">
+    <item><widget class="QLabel" name="labelTitle"><property name="text"><string>甲队 VS 乙队 — 篮球比赛</string></property><property name="alignment"><set>Qt::AlignCenter</set></property><property name="font"><font><pointsize>20</pointsize><bold>true</bold></font></property></widget></item>
+    <item>
+     <layout class="QHBoxLayout" name="teamDataLayout">
+      <item>
+       <layout class="QVBoxLayout" name="teamALayout">
+        <item><widget class="QLabel" name="labelTeamAName"><property name="text"><string>甲队</string></property><property name="alignment"><set>Qt::AlignCenter</set></property><property name="font"><font><pointsize>18</pointsize><bold>true</bold></font></property></widget></item>
+        <item><widget class="QLCDNumber" name="lcdScoreA"><property name="minimumSize"><size><width>220</width><height>140</height></size></property><property name="digitCount"><number>3</number></property><property name="styleSheet"><string notr="true">color: red; background-color: black;</string></property></widget></item>
+        <item><widget class="QLabel" name="labelScoreAOverlay"><property name="text"><string/></property><property name="alignment"><set>Qt::AlignCenter</set></property><property name="font"><font><pointsize>48</pointsize><bold>true</bold></font></property><property name="styleSheet"><string notr="true">color: #00ff00; background-color: rgba(0, 0, 0, 180); border-radius: 8px;</string></property><property name="visible"><bool>false</bool></property></widget></item>
+        <item>
+         <layout class="QHBoxLayout" name="foulTimeoutALayout">
+          <item><widget class="QLCDNumber" name="lcdFoulA"><property name="minimumSize"><size><width>100</width><height>70</height></size></property><property name="digitCount"><number>2</number></property><property name="styleSheet"><string notr="true">color: orange; background-color: black;</string></property></widget></item>
+          <item><widget class="QLCDNumber" name="lcdTimeoutA"><property name="minimumSize"><size><width>100</width><height>70</height></size></property><property name="digitCount"><number>2</number></property><property name="styleSheet"><string notr="true">color: cyan; background-color: black;</string></property></widget></item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="centerLayout">
+        <item><widget class="QLabel" name="labelVS"><property name="text"><string>VS</string></property><property name="alignment"><set>Qt::AlignCenter</set></property></widget></item>
+        <item><widget class="QLabel" name="labelGameTime"><property name="text"><string>比赛时间</string></property><property name="alignment"><set>Qt::AlignCenter</set></property></widget></item>
+        <item><widget class="QLCDNumber" name="lcdGameTime"><property name="minimumSize"><size><width>200</width><height>90</height></size></property><property name="digitCount"><number>8</number></property><property name="styleSheet"><string notr="true">color: yellow; background-color: black;</string></property></widget></item>
+        <item><widget class="QLabel" name="labelOffenseTime"><property name="text"><string>进攻倒计时</string></property><property name="alignment"><set>Qt::AlignCenter</set></property></widget></item>
+        <item><widget class="QLCDNumber" name="lcdOffenseTime"><property name="minimumSize"><size><width>140</width><height>70</height></size></property><property name="digitCount"><number>5</number></property><property name="styleSheet"><string notr="true">color: #ff6600; background-color: black;</string></property></widget></item>
+        <item><widget class="QLabel" name="labelOffenseSide"><property name="text"><string>进攻方: 甲队</string></property><property name="alignment"><set>Qt::AlignCenter</set></property><property name="font"><font><pointsize>12</pointsize><bold>true</bold></font></property></widget></item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="teamBLayout">
+        <item><widget class="QLabel" name="labelTeamBName"><property name="text"><string>乙队</string></property><property name="alignment"><set>Qt::AlignCenter</set></property><property name="font"><font><pointsize>18</pointsize><bold>true</bold></font></property></widget></item>
+        <item><widget class="QLCDNumber" name="lcdScoreB"><property name="minimumSize"><size><width>220</width><height>140</height></size></property><property name="digitCount"><number>3</number></property><property name="styleSheet"><string notr="true">color: blue; background-color: black;</string></property></widget></item>
+        <item><widget class="QLabel" name="labelScoreBOverlay"><property name="text"><string/></property><property name="alignment"><set>Qt::AlignCenter</set></property><property name="font"><font><pointsize>48</pointsize><bold>true</bold></font></property><property name="styleSheet"><string notr="true">color: #00ff00; background-color: rgba(0, 0, 0, 180); border-radius: 8px;</string></property><property name="visible"><bool>false</bool></property></widget></item>
+        <item>
+         <layout class="QHBoxLayout" name="foulTimeoutBLayout">
+          <item><widget class="QLCDNumber" name="lcdFoulB"><property name="minimumSize"><size><width>100</width><height>70</height></size></property><property name="digitCount"><number>2</number></property><property name="styleSheet"><string notr="true">color: orange; background-color: black;</string></property></widget></item>
+          <item><widget class="QLCDNumber" name="lcdTimeoutB"><property name="minimumSize"><size><width>100</width><height>70</height></size></property><property name="digitCount"><number>2</number></property><property name="styleSheet"><string notr="true">color: cyan; background-color: black;</string></property></widget></item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
