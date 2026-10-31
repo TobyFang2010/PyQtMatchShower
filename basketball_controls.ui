@@ -10,21 +10,46 @@
    <item><widget class="QLabel" name="labelTitle"><property name="text"><string>篮球快捷指令</string></property><property name="alignment"><set>Qt::AlignCenter</set></property><property name="font"><font><pointsize>14</pointsize><bold>true</bold></font></property></widget></item>
    <item><widget class="QPushButton" name="btnSwitchOffense"><property name="text"><string>切换进攻方</string></property><property name="minimumSize"><size><width>0</width><height>45</height></size></property></widget></item>
    <item><widget class="QPushButton" name="btnPause"><property name="text"><string>暂停 / 继续</string></property><property name="minimumSize"><size><width>0</width><height>45</height></size></property></widget></item>
-   <item><widget class="HorizontalLine" name="line1"/></item>
+   <item>
+    <widget class="QFrame" name="line1">
+     <property name="frameShape"><enum>QFrame::HLine</enum></property>
+     <property name="frameShadow"><enum>QFrame::Sunken</enum></property>
+    </widget>
+   </item>
    <item><widget class="QPushButton" name="btnScoreA1"><property name="text"><string>甲队 +1 分</string></property><property name="minimumSize"><size><width>0</width><height>42</height></size></property></widget></item>
    <item><widget class="QPushButton" name="btnScoreA3"><property name="text"><string>甲队 +3 分</string></property><property name="minimumSize"><size><width>0</width><height>42</height></size></property></widget></item>
    <item><widget class="QPushButton" name="btnScoreB1"><property name="text"><string>乙队 +1 分</string></property><property name="minimumSize"><size><width>0</width><height>42</height></size></property></widget></item>
    <item><widget class="QPushButton" name="btnScoreB3"><property name="text"><string>乙队 +3 分</string></property><property name="minimumSize"><size><width>0</width><height>42</height></size></property></widget></item>
-   <item><widget class="HorizontalLine" name="line2"/></item>
+   <item>
+    <widget class="QFrame" name="line2">
+     <property name="frameShape"><enum>QFrame::HLine</enum></property>
+     <property name="frameShadow"><enum>QFrame::Sunken</enum></property>
+    </widget>
+   </item>
    <item><widget class="QPushButton" name="btnSubScoreA"><property name="text"><string>甲队 -1 分</string></property><property name="minimumSize"><size><width>0</width><height>40</height></size></property></widget></item>
-   <item><widget class="QPushButton" name="btnSubScoreB"><property name="text"><string>乙队 -1 分</string></property><property name="minimumSize"><width>0</width><height>40</height></size></property></widget></item>
-   <item><widget class="HorizontalLine" name="line3"/></item>
+   <item><widget class="QPushButton" name="btnSubScoreB"><property name="text"><string>乙队 -1 分</string></property><property name="minimumSize"><size><width>0</width><height>40</height></size></property></widget></item>
+   <item>
+    <widget class="QFrame" name="line3">
+     <property name="frameShape"><enum>QFrame::HLine</enum></property>
+     <property name="frameShadow"><enum>QFrame::Sunken</enum></property>
+    </widget>
+   </item>
    <item><widget class="QPushButton" name="btnFoulA"><property name="text"><string>甲队 犯规</string></property><property name="minimumSize"><size><width>0</width><height>42</height></size></property></widget></item>
    <item><widget class="QPushButton" name="btnFoulB"><property name="text"><string>乙队 犯规</string></property><property name="minimumSize"><size><width>0</width><height>42</height></size></property></widget></item>
-   <item><widget class="HorizontalLine" name="line4"/></item>
+   <item>
+    <widget class="QFrame" name="line4">
+     <property name="frameShape"><enum>QFrame::HLine</enum></property>
+     <property name="frameShadow"><enum>QFrame::Sunken</enum></property>
+    </widget>
+   </item>
    <item><widget class="QPushButton" name="btnTimeoutA"><property name="text"><string>甲队 暂停</string></property><property name="minimumSize"><size><width>0</width><height>42</height></size></property></widget></item>
    <item><widget class="QPushButton" name="btnTimeoutB"><property name="text"><string>乙队 暂停</string></property><property name="minimumSize"><size><width>0</width><height>42</height></size></property></widget></item>
-   <item><widget class="HorizontalLine" name="line5"/></item>
+   <item>
+    <widget class="QFrame" name="line5">
+     <property name="frameShape"><enum>QFrame::HLine</enum></property>
+     <property name="frameShadow"><enum>QFrame::Sunken</enum></property>
+    </widget>
+   </item>
    <item><widget class="QPushButton" name="btnReset"><property name="text"><string>重置比分</string></property><property name="minimumSize"><size><width>0</width><height>40</height></size></property></widget></item>
    <item><spacer name="verticalSpacer"><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
   </layout>

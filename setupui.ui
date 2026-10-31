@@ -26,7 +26,7 @@
     </layout>
    </item>
    <item>
-    <widget class="GroupBox" name="groupTemplate">
+    <widget class="QGroupBox" name="groupTemplate">
      <property name="title"><string>使用模板</string></property>
      <layout class="QVBoxLayout" name="templateLayout">
       <item><widget class="QRadioButton" name="radioNone"><property name="text"><string>无（通用）</string></property><property name="checked"><bool>true</bool></property></widget></item>
@@ -36,7 +36,7 @@
     </widget>
    </item>
    <item>
-    <widget class="GroupBox" name="groupMatchSettings">
+    <widget class="QGroupBox" name="groupMatchSettings">
      <property name="title"><string>比赛设置</string></property>
      <layout class="QVBoxLayout" name="settingsLayout">
       <item>

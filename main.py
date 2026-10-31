@@ -1,319 +1,296 @@
-# -*- coding: utf-8 -*-
-"""
-比赛计分板 - 主屏展示 + 独立控制台操作
-主屏：纯展示，可投影到大屏幕
-控制台：快捷按钮，独立弹窗，放在操作人面前
-"""
+# main.py
 import sys
 from PyQt5.QtWidgets import (
     QApplication, QDialog, QMainWindow, QWidget, QVBoxLayout
 )
-from PyQt5.uic import loadUi
-from PyQt5.QtCore import QTimer, QTime
+from PyQt5.QtCore import QTimer, Qt
+
+# pyuic 编译导出的模块
+from setupui import Ui_SetupDialog
+from base_scoreboard import Ui_BaseScoreboardWindow
+from base_controls import Ui_BaseControlsDialog
+from basketball_scoreboard import Ui_BasketballScoreboardWindow
+from basketball_controls import Ui_BasketballControlsDialog
 
 
-# ========== 赛前设置 ==========
-class SetupDialog(QDialog):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        loadUi("setup.ui", self)
-        self.setFixedSize(self.size())
+class SetupDialog(QDialog, Ui_SetupDialog):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        self.match_data = None
+        self.btnStart.clicked.connect(self.on_start)
 
-        self.btnStart.clicked.connect(self.accept)
-        self.checkUnknownDuration.toggled.connect(
-            lambda c: self.timeEditDuration.setEnabled(not c))
-        self.checkFoul.toggled.connect(
-            lambda c: self.spinFoulLimit.setEnabled(c))
-        self.checkTimeout.toggled.connect(
-            lambda c: self.spinTimeoutLimit.setEnabled(c))
-        self.radioPvZ.toggled.connect(self._on_pvz)
-
-    def _on_pvz(self, checked):
-        for w in [self.timeEditDuration, self.checkUnknownDuration,
-                  self.checkFoul, self.spinFoulLimit,
-                  self.checkTimeout, self.spinTimeoutLimit,
-                  self.checkOffenseSide, self.checkMidGameChange,
-                  self.checkAutoSwitch, self.comboSwitchTiming,
-                  self.checkBigScore]:
-            w.setEnabled(not checked)
-
-    def get_config(self):
-        t = self.timeEditDuration.time()
-        return {
-            "match_name": self.lineEditMatchName.text() or "友谊赛",
-            "team_a": self.lineEditTeamA.text() or "甲队",
-            "team_b": self.lineEditTeamB.text() or "乙队",
-            "template": "basketball" if self.radioBasketball.isChecked() else
-                        "pvz" if self.radioPvZ.isChecked() else "none",
-            "duration_sec": t.second() + t.minute() * 60 + t.hour() * 3600,
+    def on_start(self):
+        data = {
+            "team_a": self.lineEditTeamA.text().strip() or "甲队",
+            "team_b": self.lineEditTeamB.text().strip() or "乙队",
+            "match_name": self.lineEditMatchName.text().strip(),
+            "template": "none",
+            "total_time": self.timeEditDuration.time(),
+            "unknown_duration": self.checkUnknownDuration.isChecked(),
             "use_foul": self.checkFoul.isChecked(),
+            "foul_limit": self.spinFoulLimit.value(),
             "use_timeout": self.checkTimeout.isChecked(),
-            "total_rounds": self.spinTotalRounds.value(),
+            "timeout_limit": self.spinTimeoutLimit.value(),
+            "enable_offense": self.checkOffenseSide.isChecked(),
+            "allow_change": self.checkMidGameChange.isChecked(),
+            "auto_switch": self.checkAutoSwitch.isChecked(),
+            "switch_timing": self.comboSwitchTiming.currentText(),
+            "use_big_score": self.checkBigScore.isChecked(),
+            "rounds": self.spinTotalRounds.value()
         }
+        if self.radioBasketball.isChecked():
+            data["template"] = "basketball"
+        self.match_data = data
+        self.accept()
 
 
-# ========== 主屏展示（通用） ==========
-class BaseScoreboardWindow(QMainWindow):
-    OVERLAY_MS = 3500
+class BaseControlsDialog(QDialog, Ui_BaseControlsDialog):
+    def __init__(self, parent_board):
+        super().__init__()
+        self.setupUi(self)
+        self.board = parent_board
+        self.btnAddScoreA.clicked.connect(lambda: self.board.add_score("A", 1))
+        self.btnAddScoreB.clicked.connect(lambda: self.board.add_score("B", 1))
+        self.btnSubScoreA.clicked.connect(lambda: self.board.add_score("A", -1))
+        self.btnSubScoreB.clicked.connect(lambda: self.board.add_score("B", -1))
+        self.btnPause.clicked.connect(self.board.toggle_clock)
+        self.btnReset.clicked.connect(self.board.reset_all)
 
-    def __init__(self, config, parent=None):
-        super().__init__(parent)
-        loadUi("base_scoreboard.ui", self)
-        self.config = config
 
+class BaseScoreboardWindow(QMainWindow, Ui_BaseScoreboardWindow):
+    def __init__(self, match_data):
+        super().__init__()
+        self.setupUi(self)
+        self.data = match_data
         self.score_a = 0
         self.score_b = 0
-        self.remaining_sec = config.get("duration_sec", 1200)
-        self.is_paused = False
-
-        self.labelTitle.setText(
-            f"{config['team_a']} VS {config['team_b']} — {config['match_name']}")
-        self.labelTeamAName.setText(config["team_a"])
-        self.labelTeamBName.setText(config["team_b"])
-        self._refresh()
-
-        self.timer = QTimer(self)
+        self.running = False
+        self.timer = QTimer()
         self.timer.setInterval(1000)
-        self.timer.timeout.connect(self._tick)
-        self.timer.start()
+        self.timer.timeout.connect(self.tick)
 
-        self.overlay_timer_a = QTimer(self)
-        self.overlay_timer_a.setSingleShot(True)
-        self.overlay_timer_a.timeout.connect(lambda: self._hide_overlay("A"))
+        self.labelTeamAName.setText(self.data["team_a"])
+        self.labelTeamBName.setText(self.data["team_b"])
+        title = self.data["match_name"] or f"{self.data['team_a']} VS {self.data['team_b']}"
+        self.labelTitle.setText(title)
 
-        self.overlay_timer_b = QTimer(self)
-        self.overlay_timer_b.setSingleShot(True)
-        self.overlay_timer_b.timeout.connect(lambda: self._hide_overlay("B"))
+        hh = self.data["total_time"].hour()
+        mm = self.data["total_time"].minute()
+        ss = self.data["total_time"].second()
+        self.remain_sec = hh * 3600 + mm * 60 + ss
+        self.refresh_lcd()
 
-    def _refresh(self):
+        self.overlay_timer = QTimer()
+        self.overlay_timer.setSingleShot(True)
+        self.overlay_timer.timeout.connect(self.hide_overlay)
+
+        self.ctrl_win = BaseControlsDialog(self)
+        self.ctrl_win.show()
+
+    def refresh_lcd(self):
         self.lcdScoreA.display(self.score_a)
         self.lcdScoreB.display(self.score_b)
-        t = QTime(0, 0).addSecs(self.remaining_sec)
-        self.lcdTime.display(t.toString("mm:ss"))
+        h, r = divmod(self.remain_sec, 3600)
+        m, s = divmod(r, 60)
+        self.lcdTime.display(f"{h:02d}:{m:02d}:{s:02d}")
 
-    def _tick(self):
-        if not self.is_paused and self.remaining_sec > 0:
-            self.remaining_sec -= 1
-            self._refresh()
-
-    def add_score(self, team, points):
-        if team == "A":
-            self.score_a += points
-            self._show_overlay("A", points)
+    def add_score(self, side, delta):
+        if side == "A":
+            self.score_a = max(0, self.score_a + delta)
+            self.labelScoreAOverlay.setText(f"{delta:+d}")
+            self.labelScoreAOverlay.setVisible(True)
         else:
-            self.score_b += points
-            self._show_overlay("B", points)
-        self._refresh()
+            self.score_b = max(0, self.score_b + delta)
+            self.labelScoreBOverlay.setText(f"{delta:+d}")
+            self.labelScoreBOverlay.setVisible(True)
+        self.overlay_timer.start(1200)
+        self.refresh_lcd()
 
-    def sub_score(self, team, points):
-        if team == "A":
-            self.score_a = max(0, self.score_a - points)
+    def hide_overlay(self):
+        self.labelScoreAOverlay.setVisible(False)
+        self.labelScoreBOverlay.setVisible(False)
+
+    def toggle_clock(self):
+        if self.running:
+            self.timer.stop()
+            self.running = False
         else:
-            self.score_b = max(0, self.score_b - points)
-        self._refresh()
+            self.timer.start()
+            self.running = True
 
-    def toggle_pause(self):
-        self.is_paused = not self.is_paused
+    def tick(self):
+        if self.remain_sec > 0:
+            self.remain_sec -= 1
+            self.refresh_lcd()
+        else:
+            self.timer.stop()
+            self.running = False
 
-    def reset_score(self):
+    def reset_all(self):
         self.score_a = 0
         self.score_b = 0
-        self._refresh()
-
-    def _show_overlay(self, team, points):
-        label = self.labelScoreAOverlay if team == "A" else self.labelScoreBOverlay
-        timer = self.overlay_timer_a if team == "A" else self.overlay_timer_b
-        label.setText(f"+{points}")
-        label.show()
-        label.raise_()
-        timer.start(self.OVERLAY_MS)
-
-    def _hide_overlay(self, team):
-        if team == "A":
-            self.labelScoreAOverlay.hide()
-        else:
-            self.labelScoreBOverlay.hide()
+        hh = self.data["total_time"].hour()
+        mm = self.data["total_time"].minute()
+        ss = self.data["total_time"].second()
+        self.remain_sec = hh * 3600 + mm * 60 + ss
+        self.refresh_lcd()
 
 
-# ========== 控制台（通用） ==========
-class BaseControlsDialog(QDialog):
-    def __init__(self, scoreboard, parent=None):
-        super().__init__(parent)
-        loadUi("base_controls.ui", self)
-        self.scoreboard = scoreboard
-        self.setFixedSize(self.size())
+class BasketballControlsDialog(QDialog, Ui_BasketballControlsDialog):
+    def __init__(self, parent_board):
+        super().__init__()
+        self.setupUi(self)
+        self.board = parent_board
+        self.btnSwitchOffense.clicked.connect(self.board.switch_offense)
+        self.btnPause.clicked.connect(self.board.toggle_clock)
 
-        self.btnAddScoreA.clicked.connect(lambda: self.scoreboard.add_score("A", 1))
-        self.btnAddScoreB.clicked.connect(lambda: self.scoreboard.add_score("B", 1))
-        self.btnSubScoreA.clicked.connect(lambda: self.scoreboard.sub_score("A", 1))
-        self.btnSubScoreB.clicked.connect(lambda: self.scoreboard.sub_score("B", 1))
-        self.btnPause.clicked.connect(self._on_pause)
-        self.btnReset.clicked.connect(self.scoreboard.reset_score)
+        self.btnScoreA1.clicked.connect(lambda: self.board.add_score("A", 1))
+        self.btnScoreA3.clicked.connect(lambda: self.board.add_score("A", 3))
+        self.btnScoreB1.clicked.connect(lambda: self.board.add_score("B", 1))
+        self.btnScoreB3.clicked.connect(lambda: self.board.add_score("B", 3))
 
-    def _on_pause(self):
-        self.scoreboard.toggle_pause()
-        self.btnPause.setText("继续" if self.scoreboard.is_paused else "暂停 / 继续")
+        self.btnSubScoreA.clicked.connect(lambda: self.board.add_score("A", -1))
+        self.btnSubScoreB.clicked.connect(lambda: self.board.add_score("B", -1))
+
+        self.btnFoulA.clicked.connect(lambda: self.board.add_foul("A"))
+        self.btnFoulB.clicked.connect(lambda: self.board.add_foul("B"))
+
+        self.btnTimeoutA.clicked.connect(lambda: self.board.use_timeout("A"))
+        self.btnTimeoutB.clicked.connect(lambda: self.board.use_timeout("B"))
+
+        self.btnReset.clicked.connect(self.board.reset_all)
 
 
-# ========== 主屏展示（篮球） ==========
-class BasketballScoreboardWindow(BaseScoreboardWindow):
-    OFFENSE_SEC = 24
-
-    def __init__(self, config, parent=None):
-        QMainWindow.__init__(self, parent)
-        loadUi("basketball_scoreboard.ui", self)
-        self.config = config
-
+class BasketballScoreboardWindow(QMainWindow, Ui_BasketballScoreboardWindow):
+    def __init__(self, match_data):
+        super().__init__()
+        self.setupUi(self)
+        self.data = match_data
         self.score_a = 0
         self.score_b = 0
         self.foul_a = 0
         self.foul_b = 0
-        self.timeout_a = 0
-        self.timeout_b = 0
-        self.remaining_sec = config.get("duration_sec", 720)
-        self.offense_sec = self.OFFENSE_SEC
-        self.is_paused = False
-        self.offense_team = "A"
+        self.timeout_a = self.data["timeout_limit"]
+        self.timeout_b = self.data["timeout_limit"]
+        self.offense_side = "A"
+        self.running = False
 
-        self.labelTitle.setText(
-            f"{config['team_a']} VS {config['team_b']} — {config['match_name']}")
-        self.labelTeamAName.setText(config["team_a"])
-        self.labelTeamBName.setText(config["team_b"])
-        self._refresh()
-
-        self.timer = QTimer(self)
+        self.timer = QTimer()
         self.timer.setInterval(1000)
-        self.timer.timeout.connect(self._tick)
-        self.timer.start()
+        self.timer.timeout.connect(self.tick)
 
-        self.overlay_timer_a = QTimer(self)
-        self.overlay_timer_a.setSingleShot(True)
-        self.overlay_timer_a.timeout.connect(lambda: self._hide_overlay("A"))
-        self.overlay_timer_b = QTimer(self)
-        self.overlay_timer_b.setSingleShot(True)
-        self.overlay_timer_b.timeout.connect(lambda: self._hide_overlay("B"))
+        self.labelTeamAName.setText(self.data["team_a"])
+        self.labelTeamBName.setText(self.data["team_b"])
+        title = self.data["match_name"] or f"{self.data['team_a']} VS {self.data['team_b']}"
+        self.labelTitle.setText(title)
+        self.labelOffenseSide.setText(f"进攻方: {self.data['team_a']}")
 
-    def _refresh(self):
+        hh = self.data["total_time"].hour()
+        mm = self.data["total_time"].minute()
+        ss = self.data["total_time"].second()
+        self.remain_sec = hh * 3600 + mm * 60 + ss
+
+        self.overlay_timer = QTimer()
+        self.overlay_timer.setSingleShot(True)
+        self.overlay_timer.timeout.connect(self.hide_overlay)
+
+        self.refresh_lcd()
+        self.ctrl_win = BasketballControlsDialog(self)
+        self.ctrl_win.show()
+
+    def refresh_lcd(self):
         self.lcdScoreA.display(self.score_a)
         self.lcdScoreB.display(self.score_b)
         self.lcdFoulA.display(self.foul_a)
         self.lcdFoulB.display(self.foul_b)
         self.lcdTimeoutA.display(self.timeout_a)
         self.lcdTimeoutB.display(self.timeout_b)
-        t = QTime(0, 0).addSecs(self.remaining_sec)
-        self.lcdGameTime.display(t.toString("mm:ss"))
-        ot = QTime(0, 0).addSecs(self.offense_sec)
-        self.lcdOffenseTime.display(ot.toString("mm:ss.z"))
-        side = self.config["team_a"] if self.offense_team == "A" else self.config["team_b"]
-        self.labelOffenseSide.setText(f"进攻方: {side}")
 
-    def _tick(self):
-        if not self.is_paused and self.remaining_sec > 0:
-            self.remaining_sec -= 1
-            if self.offense_sec > 0:
-                self.offense_sec -= 1
-            self._refresh()
+        h, r = divmod(self.remain_sec, 3600)
+        m, s = divmod(r, 60)
+        self.lcdGameTime.display(f"{h:02d}:{m:02d}:{s:02d}")
 
-    def add_score(self, team, points):
-        if team == "A":
-            self.score_a += points
-            self._show_overlay("A", points)
+        name = self.data["team_a"] if self.offense_side == "A" else self.data["team_b"]
+        self.labelOffenseSide.setText(f"进攻方: {name}")
+
+    def add_score(self, side, delta):
+        if side == "A":
+            self.score_a = max(0, self.score_a + delta)
+            self.labelScoreAOverlay.setText(f"{delta:+d}")
+            self.labelScoreAOverlay.setVisible(True)
         else:
-            self.score_b += points
-            self._show_overlay("B", points)
-        self.offense_sec = self.OFFENSE_SEC
-        self._refresh()
+            self.score_b = max(0, self.score_b + delta)
+            self.labelScoreBOverlay.setText(f"{delta:+d}")
+            self.labelScoreBOverlay.setVisible(True)
+        self.overlay_timer.start(1200)
+        self.refresh_lcd()
 
-    def add_foul(self, team):
-        if team == "A":
+    def hide_overlay(self):
+        self.labelScoreAOverlay.setVisible(False)
+        self.labelScoreBOverlay.setVisible(False)
+
+    def switch_offense(self):
+        self.offense_side = "B" if self.offense_side == "A" else "A"
+        self.refresh_lcd()
+
+    def add_foul(self, side):
+        if side == "A":
             self.foul_a += 1
         else:
             self.foul_b += 1
-        self._refresh()
+        self.refresh_lcd()
 
-    def add_team_timeout(self, team):
-        if team == "A":
-            self.timeout_a += 1
+    def use_timeout(self, side):
+        if side == "A" and self.timeout_a > 0:
+            self.timeout_a -= 1
+        elif side == "B" and self.timeout_b > 0:
+            self.timeout_b -= 1
+        self.refresh_lcd()
+
+    def toggle_clock(self):
+        if self.running:
+            self.timer.stop()
+            self.running = False
         else:
-            self.timeout_b += 1
-        self._refresh()
+            self.timer.start()
+            self.running = True
 
-    def switch_offense(self):
-        self.offense_team = "B" if self.offense_team == "A" else "A"
-        self.offense_sec = self.OFFENSE_SEC
-        self._refresh()
-
-    def reset_score(self):
-        self.score_a = self.score_b = 0
-        self.foul_a = self.foul_b = 0
-        self.timeout_a = self.timeout_b = 0
-        self.offense_sec = self.OFFENSE_SEC
-        self._refresh()
-
-    def _show_overlay(self, team, points):
-        label = self.labelScoreAOverlay if team == "A" else self.labelScoreBOverlay
-        timer = self.overlay_timer_a if team == "A" else self.overlay_timer_b
-        label.setText(f"+{points}")
-        label.show()
-        label.raise_()
-        timer.start(self.OVERLAY_MS)
-
-    def _hide_overlay(self, team):
-        if team == "A":
-            self.labelScoreAOverlay.hide()
+    def tick(self):
+        if self.remain_sec > 0:
+            self.remain_sec -= 1
+            self.refresh_lcd()
         else:
-            self.labelScoreBOverlay.hide()
+            self.timer.stop()
+            self.running = False
+
+    def reset_all(self):
+        self.score_a = 0
+        self.score_b = 0
+        self.foul_a = 0
+        self.foul_b = 0
+        self.timeout_a = self.data["timeout_limit"]
+        self.timeout_b = self.data["timeout_limit"]
+        self.offense_side = "A"
+
+        hh = self.data["total_time"].hour()
+        mm = self.data["total_time"].minute()
+        ss = self.data["total_time"].second()
+        self.remain_sec = hh * 3600 + mm * 60 + ss
+        self.refresh_lcd()
 
 
-# ========== 控制台（篮球） ==========
-class BasketballControlsDialog(QDialog):
-    def __init__(self, scoreboard, parent=None):
-        super().__init__(parent)
-        loadUi("basketball_controls.ui", self)
-        self.scoreboard = scoreboard
-        self.setFixedSize(self.size())
-
-        self.btnScoreA1.clicked.connect(lambda: self.scoreboard.add_score("A", 1))
-        self.btnScoreA3.clicked.connect(lambda: self.scoreboard.add_score("A", 3))
-        self.btnScoreB1.clicked.connect(lambda: self.scoreboard.add_score("B", 1))
-        self.btnScoreB3.clicked.connect(lambda: self.scoreboard.add_score("B", 3))
-        self.btnSubScoreA.clicked.connect(lambda: self.scoreboard.sub_score("A", 1))
-        self.btnSubScoreB.clicked.connect(lambda: self.scoreboard.sub_score("B", 1))
-        self.btnFoulA.clicked.connect(lambda: self.scoreboard.add_foul("A"))
-        self.btnFoulB.clicked.connect(lambda: self.scoreboard.add_foul("B"))
-        self.btnTimeoutA.clicked.connect(lambda: self.scoreboard.add_team_timeout("A"))
-        self.btnTimeoutB.clicked.connect(lambda: self.scoreboard.add_team_timeout("B"))
-        self.btnSwitchOffense.clicked.connect(self.scoreboard.switch_offense)
-        self.btnPause.clicked.connect(self._on_pause)
-        self.btnReset.clicked.connect(self.scoreboard.reset_score)
-
-    def _on_pause(self):
-        self.scoreboard.toggle_pause()
-        self.btnPause.setText("继续" if self.scoreboard.is_paused else "暂停 / 继续")
-
-
-# ========== 主入口 ==========
 def main():
     app = QApplication(sys.argv)
-
     setup = SetupDialog()
-    if setup.exec_() != QDialog.Accepted:
-        sys.exit(0)
-    config = setup.get_config()
-
-    if config["template"] == "basketball":
-        scoreboard = BasketballScoreboardWindow(config)
-        controls = BasketballControlsDialog(scoreboard)
+    if setup.exec_() != QDialog.Accepted or setup.match_data is None:
+        return
+    md = setup.match_data
+    if md["template"] == "basketball":
+        win = BasketballScoreboardWindow(md)
     else:
-        scoreboard = BaseScoreboardWindow(config)
-        controls = BaseControlsDialog(scoreboard)
-
-    scoreboard.show()
-    controls.show()
-
-    # 控制台放到主屏旁边
-    controls.move(scoreboard.x() + scoreboard.width() + 20, scoreboard.y())
-
+        win = BaseScoreboardWindow(md)
+    win.showMaximized()
     sys.exit(app.exec_())
 
 
